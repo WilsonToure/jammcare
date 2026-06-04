@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  /* design tokens (oklch values placeholder) */
+  --primary: oklch(65% 0.12 230);
+  --success: oklch(62% 0.09 150);
+  --surface: oklch(95% 0.02 220);
+}
+
+body { background: var(--surface); font-family: Inter, system-ui, sans-serif }
+
