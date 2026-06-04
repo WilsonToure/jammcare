@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppRole {
+  patient
+  doctor
+  admin
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+model profiles {
+  id        Int     @id @default(autoincrement())
+  full_name String
+  phone     String?
+  city      String?
+  language  String? @default("fr")
+  avatar_url String?
+  createdAt DateTime @default(now())
+  user_roles user_roles[]
+  user      users? @relation(fields: [user_id], references: [id])
+  user_id   Int?    
+}
+
+model users {
+  id Int @id @default(autoincrement())
+  email String @unique
+  password_hash String
+  profile profiles? @relation
+  createdAt DateTime @default(now())
+}
+
+model user_roles {
+  id     Int     @id @default(autoincrement())
+  user   profiles @relation(fields: [user_id], references: [id])
+  user_id Int
+  app_role AppRole
+}
+
+model patients {
+  id Int @id @default(autoincrement())
+  profile profiles? @relation(fields: [profile_id], references: [id])
+  profile_id Int?
+  birth_date DateTime?
+  gender String?
+  blood_type String?
+  allergies String?
+  chronic_conditions String?
+}
+
+model doctors {
+  id Int @id @default(autoincrement())
+  profile profiles? @relation(fields: [profile_id], references: [id])
+  profile_id Int?
+  specialty String?
+  license_number String?
+  status String?    // pending/verified/rejected
+  bio String?
+  years_experience Int?
+  consultation_price Float?
+  languages String?  // CSV or JSON
+}
+
+model doctor_availability {
+  id Int @id @default(autoincrement())
+  doctor_id Int
+  weekday Int
+  start_time String
+  end_time String
+  slot_minutes Int
+}
+
+model appointments {
+  id Int @id @default(autoincrement())
+  patient_id Int
+  doctor_id Int
+  scheduled_at DateTime
+  reason String?
+  status AppointmentStatus @default(pending)
+  notes String?
+  createdAt DateTime @default(now())
+}
+
+model consultations {
+  id Int @id @default(autoincrement())
+  appointment_id Int
+  started_at DateTime?
+  ended_at DateTime?
+  diagnosis String?
+  notes String?
+  video_room_id String?
+}
+
+model prescriptions {
+  id Int @id @default(autoincrement())
+  patient_id Int
+  doctor_id Int
+  consultation_id Int?
+  issued_at DateTime @default(now())
+  medications Json?
+  instructions String?
+  signature String?
+}
+
+model medical_records {
+  id Int @id @default(autoincrement())
+  patient_id Int
+  doctor_id Int?
+  type String
+  title String
+  content String?
+  file_url String?
+  createdAt DateTime @default(now())
+}
+
+model messages {
+  id Int @id @default(autoincrement())
+  sender_id Int
+  recipient_id Int
+  content String
+  read_at DateTime?
+  createdAt DateTime @default(now())
+}
+
+model notifications {
+  id Int @id @default(autoincrement())
+  user_id Int
+  title String
+  body String
+  link String?
+  read_at DateTime?
+  createdAt DateTime @default(now())
+}
+
+model health_facilities {
+  id Int @id @default(autoincrement())
+  name String
+  type String
+  latitude Float?
+  longitude Float?
+  address String?
+  phone String?
+  opening_hours String?
+  city String?
+  region String?
+}
